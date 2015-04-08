@@ -1,0 +1,238 @@
+#!/usr/bin/python2
+# Script Name: pharospopup
+# Script Function:
+#	This is the pharospopup server that is run at users login to the desktop GUI session. It receives messages from the pharos CUPS backend and shows a dialog to the users for input
+# 
+# Author: Junaid Ali
+# Version: 1.0
+
+# Imports ============================================
+import sys
+import wx
+import ConfigParser
+import os
+import logging
+import logging.config
+import syslog
+import socket
+import subprocess
+
+# Script Variables ===================================
+configFilePath = os.path.join(os.getenv("HOME"),'.pharos')
+programConfigFilePath = '/usr/local/etc/pharos.conf'
+
+# Class Declaration ==================================
+class wxPopupFrame(wx.Frame):
+	"""This is the frame for our application, it is derived from
+	the wx.Frame element."""
+
+	def __init__(self, *args, **kwargs):
+		"""Initialize, and let the user set any Frame settings"""
+		wx.Frame.__init__(self, *args, **kwargs)
+		self.create_controls()                         
+
+	def create_controls(self):
+		"""Called when the controls on Window are to be created"""
+		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)		
+		self.titleText = wx.StaticText(self, -1, "Print Job Details")
+		self.titleText.SetFont(titleFont)
+		self.userInputText = wx.StaticText(self, -1, "Please enter your myIIT ID*")
+		self.sizingPanelAfterUserInputText = wx.Panel(self, -1)
+		self.userInputTextCtrl = wx.TextCtrl(self, -1, "",  style=wx.TE_PROCESS_ENTER)
+		self.userInformationText = wx.StaticText(self, -1, "* This ID will be used at the release station to release your print job")
+		self.sizingPanelBeforeButtons = wx.Panel(self, -1)
+		self.printButton = wx.Button(self, -1, "Print")
+		self.cancelButton = wx.Button(self, -1, "Cancel")
+
+		self.__set_properties()
+		self.__do_layout()
+
+		self.Bind(wx.EVT_BUTTON, self.printCommand, self.printButton)
+		self.Bind(wx.EVT_BUTTON, self.cancelCommand, self.cancelButton)
+		self.Bind(wx.EVT_CLOSE,  self.cancelCommand) 
+		self.Bind(wx.EVT_TEXT_ENTER,  self.printCommand,  self.userInputTextCtrl)
+
+		if os.path.exists(configFilePath):
+			config = ConfigParser.SafeConfigParser({'cachedid':'None',  'currentid': 'None'})
+			config.read(configFilePath)
+			cachedId = config.get("pharos",  "cachedid")
+			if cachedId != 'None':
+				self.userInputTextCtrl.SetValue(cachedId)
+
+	def __set_properties(self):
+		"""Set the display properties of the frame"""
+		self.SetTitle("Remote Printing Popup")
+		self.SetSize((520, 250))
+
+	def __do_layout(self):
+		"""Perform the layout of items onto the frame"""
+		PopupFrameSizer = wx.BoxSizer(wx.VERTICAL)
+		buttonsBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+		userInputBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+		PopupFrameSizer.Add(self.titleText, 0, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_VERTICAL, 2)
+		userInputBoxSizer.Add(self.userInputText, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 0)
+		userInputBoxSizer.Add(self.sizingPanelAfterUserInputText, 1, wx.EXPAND, 0)
+		userInputBoxSizer.Add(self.userInputTextCtrl, 10, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 0)
+		PopupFrameSizer.Add(userInputBoxSizer, 1, wx.EXPAND, 0)
+		PopupFrameSizer.Add(self.userInformationText, 0, 0, 0)
+		buttonsBoxSizer.Add(self.sizingPanelBeforeButtons, 1, wx.EXPAND, 0)
+		buttonsBoxSizer.Add(self.printButton, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+		buttonsBoxSizer.Add(self.cancelButton, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+		PopupFrameSizer.Add(buttonsBoxSizer, 1, wx.EXPAND, 0)
+		self.SetSizer(PopupFrameSizer)
+		self.Layout()
+		self.Centre()           
+
+	def updateConfig(self,  userId):
+		# Delete old file if it exists
+		if os.path.exists(configFilePath):
+			os.remove(configFilePath)
+		config = ConfigParser.SafeConfigParser({'cachedid':'None', 'printjob': 'no', 'currentid': 'None'})
+		config.add_section('pharos')
+		config.set("pharos",  "currentid", userId)
+		config.set("pharos",  "cachedid", userId)
+		config.set("pharos",  "printjob", 'yes')
+		with open(configFilePath,  'wb') as configFile:
+			config.write(configFile)		
+		logger.info("Successfully updated config file with currentid = %s" %(userId))
+
+
+	def printCommand(self, event):
+		"""Handle the users choice of clicking the print button"""
+		inputLength = len(self.userInputTextCtrl.GetValue().strip())
+		if self.userInputTextCtrl.IsEmpty() or inputLength == 0:
+			logger.warn('User entered invalid input. Displaying warning message')
+			errorDialog = wx.MessageDialog(self, "User ID cannot be blank", "Input Error",  wx.OK | wx.ICON_ERROR)
+			errorDialog.ShowModal()
+			self.userInputTextCtrl.Clear()
+		else:                
+			# Write to config file
+			logger.info("Updating config file on user input %s" %(self.userInputTextCtrl.GetValue().strip()))
+			self.updateConfig(self.userInputTextCtrl.GetValue().strip())
+			self.Destroy()
+			event.Skip()
+
+	def cancelCommand(self, event):
+		"""Handle the users choice of clicking the cancel button"""
+		logger.warn('User chose to cancel the print job')
+		currentID = 'None'
+		cachedID = 'None'
+		if os.path.exists(configFilePath):
+			config = ConfigParser.SafeConfigParser()
+			config.readfp(open(configFilePath))
+			currentID = config.get("pharos", "currentid")
+			cachedID = config.get("pharos", "cachedid")
+				
+		# Update config parser
+		config = ConfigParser.SafeConfigParser({'cachedid':'None',  'printjob':"no", 'currentid': 'None'})
+		config.add_section('pharos')
+		config.set("pharos", "currentid", currentID)
+		config.set("pharos", "cachedid", cachedID)
+		config.set("pharos", "printjob", "no")
+		with open(configFilePath,  'wb') as configFile:
+			config.write(configFile)
+		logger.info('successfully updated config with currentid: %s, cachedid: %s and printjob: %s' %(currentID, cachedID, "no"))
+		
+		self.Destroy()
+
+class wxRemotePrintingPopupApp(wx.App):
+	"""The wx.App for the wxRemotePrintingPopup application"""
+	def OnInit(self):
+		"""Override OnInit to create our Frame"""            
+		self.frame = wxPopupFrame(None, title="Remote Printing")            
+		self.frame.Show()
+		self.SetTopWindow(self.frame)            
+		return True
+
+class PharosPopupServer:
+	"""
+	This is a popup server which prompts the user for input when it receives message from CUPS daemon
+	"""
+	def __init__(self, log):
+		"""
+		Construtor
+		"""
+		self.logger = log
+		self.logger.info('Initializing Popup Server')
+		# Read the config
+		if os.path.exists(programConfigFilePath):
+			self.logger.info('calculating port information using %s' %configFilePath)
+			config = ConfigParser.ConfigParser()
+			config.read(programConfigFilePath)
+			self.port = config.getint("popupserver", "port")
+			self.logger.info('Setting up the listening port to %d' %self.port)
+		else:
+			self.port = 50000
+		self.host = ''
+		self.backlog = 5
+		self.size = 1024
+		
+	def run(self):
+		self.logger.info('Starting popup server: host %s, port %d, backlog: %d, size: %d ' %(self.host, self.port, self.backlog, self.size))
+		try:			
+			self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			self.s.bind((self.host,self.port))
+			self.s.listen(self.backlog)
+			while 1:
+				client, address = self.s.accept()
+				print 'Connection Received'
+				data = client.recv(self.size)
+				if data:
+					# Get the users input
+					self.logger.info('Pocessing %s' %data)
+					if data == 'GetPrintJobParameters':
+						self.logger.info('Trying to get print job parameters')
+						client.send(self.getPrintJobParameters())						
+					else:
+						self.logger.warn('Unknown command %s received' %data)
+						client.send('UNKNOWN')
+					client.close()
+		except socket.error, (value, message):
+			if self.s:
+				self.s.close()
+			self.logger.error('Could not open socket. Error: %s' %message)
+			
+		
+	def getPrintJobParameters(self):
+		# Run the GUI
+		try:
+			app = wxRemotePrintingPopupApp()
+			app.MainLoop()        
+		except Exception,  e:
+			self.logger.warn('Error Initializing GUI Input ')
+		# Read the currentID from config file
+		if os.path.exists(configFilePath):
+			config = ConfigParser.SafeConfigParser({'cachedid':'None', 'printjob':'no', 'currentid': 'None'})
+			config.read(configFilePath)
+			cachedId = config.get("pharos", "cachedid")
+			printjob = config.get("pharos", "printjob")
+			if cachedId != 'None':
+				self.logger.info('Returning user ID = %s' %cachedId)
+				return "userid:" + cachedId + ",printjob:" + printjob
+		
+		self.logger.warn('Returning user ID = NONE')
+		return "userid: None,printjob: no"
+	
+
+# Function Declaration ===============================
+
+def main():
+	"""
+	The main function of the script
+	"""	
+	logger.debug('Running %s' %sys.argv[0])
+	popupserver = PharosPopupServer(logger)
+	popupserver.run() # Start listening
+	
+
+# Main Script ========================================
+# Initiate logger	
+try:
+	logging.config.fileConfig(programConfigFilePath)
+	logger = logging.getLogger('pharospopup')	    
+except (TypeError, ConfigParser.NoSectionError):
+	syslog.syslog(syslog.LOG_ERR, '%s could not instantiate logging using config file %s. Exiting' %(sys.argv[0], programConfigFilePath))
+	sys.exit(1)
+
+if __name__ == "__main__":	
+	main()

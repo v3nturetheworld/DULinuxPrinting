@@ -1,0 +1,113 @@
+#!/usr/bin/python2
+# Script Name: pharos-uninstall.py
+# Script Function:
+#	This script will uninstall pharos remote printing from the system.
+#	The following tasks will be performed:
+#	1. Remove the pharos backend from cups backend directory
+#	2. Remove the popup scripts from /usr/local/bin/pharospopup
+#	3. Remove the config file from /usr/local/etc/
+#	4. Remove the uninstall script from /usr/local/bin/
+#	5. Remove the users desktop environment autorun settings for running pharospoup at login
+#	6. Delete the print queues that use pharos backend
+#	
+# Usage: 
+#	$sudo python pharos-uninstall
+#		This will uninstall the pharos remote printing
+#
+# Author: Junaid Ali
+# Version: 1.0
+
+# Imports ===============================
+import logging
+import sys
+import os
+import subprocess
+
+# Script Variables ======================
+logFile = '/tmp/pharosuninstall.log'
+uninstallerSharedLibraryDIR = '/usr/local/lib/pharos'
+cleanupFile = '/tmp/pharoscleanup.sh'
+
+# Functions =============================
+def createCleanupFile(cleanupFile):
+	"""
+	Creates a cleanup file
+	"""	
+	pharosUninstallerExe = '/usr/local/bin/pharos-uninstall'
+	logger.info('Creating cleanup file %s' %cleanupFile)
+	cleanupFileHandle = open(cleanupFile, 'w')
+	cleanupFileHandle.writelines('#!/bin/sh\n')	
+	cleanupFileHandle.writelines('sleep 5s\n')
+	cleanupFileHandle.writelines('rm -f %s\n' %pharosUninstallerExe)	
+	cleanupFileHandle.close()
+	logger.info('successfully created cleanup file %s' %cleanupFile)
+	
+	logger.info('setting execution bit on file %s' %cleanupFile)
+	try:
+		chmod = subprocess.call(['chmod', '+x', cleanupFile])
+	except:
+		logger.warn('Cannot set executable bit on file %s' %cleanupFile)
+
+# Main Script ============================
+
+# Make sure user wants to run it
+userChoice = raw_input('Do you wish to run the pharos remote printing uninstaller (y/n)?:  ')
+if userChoice not in ['y', 'Y', 'yes', 'Yes', 'yEs', 'yeS', 'YEs', 'yES', 'YES']:
+	sys.exit(0)
+
+# Create logger
+logger = logging.getLogger('pharos-uninstaller')
+logger.setLevel(logging.DEBUG)
+# Create file handler
+fh = logging.FileHandler(logFile)
+fh.setLevel(logging.DEBUG)
+# create console handler
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARN)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+# add loggers
+logger.addHandler(fh)
+logger.addHandler(ch)
+
+# imports
+sys.path.append(os.getcwd())
+if os.path.exists(uninstallerSharedLibraryDIR):
+	sys.path.append(uninstallerSharedLibraryDIR)
+		
+try:	
+	from printerutils import PrinterUtility
+except:
+	logger.error('Cannot import module printerutil')	
+	sys.exit(1)
+
+try:	
+	from processutils import ProcessUtility
+except:
+	logger.error('Cannot import module processutil')	
+	sys.exit(1)
+
+try:	
+	from pharosuninstall import PharosUninstaller
+except:
+	logger.error('Cannot import module printerutil')
+	sys.exit(1)
+
+printerUtility = PrinterUtility(logger)
+processUtility = ProcessUtility(logger)
+pharosUninstaller = PharosUninstaller(logger, printerUtility, processUtility)
+
+if __name__ == "__main__":
+	if pharosUninstaller.uninstall():
+		logger.info('Uninstaller terminated successfully')
+		createCleanupFile(cleanupFile)
+		if os.path.exists(cleanupFile):
+			logger.info('Running cleanup file %s' %cleanupFile)
+			try:
+				pid = subprocess.Popen([cleanupFile], shell=False, stdin=None, stdout=None, stderr=None)
+				print('Successfully completed uninstallation!')
+			except:
+				logger.warn('could not run cleanup command. manually remove the uninstaller file')
+	else:
+		logger.warn('The uninstaller did not complete successfully')
