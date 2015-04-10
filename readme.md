@@ -1,52 +1,96 @@
-#DU Linux Printer Installation Guide#
 
-**NOTE: Colored Printing has not been figured out yet**
+#DU Linux Printer Installation Guide
+----
 
-##Basics##
+##Debian/Ubuntu Distro Quick Install
+----
 
-**You need to have the following installed**
+**Make Sure to Read *Some Things To Note* Below after you set the printers up. There are instructions on how to properly use the software there and avoid running into issues with printing.**
 
-*python 2.7 
-  *To check open a terminal and type: ls /usr/bin | grep python
-  *If python3.whatever is installed you will need to use **python2** wherever python is listed
-*PIP
-  *Again to check if installed type: ls /usr/bin | grep pip
-  *Make sure that you have pip2 or pip2.7
-*WxPython - To check if installed go to a terminal, type **python** and type **import wx**
-  *If it's not installed, and you have pip installed type **pip install wx**
-*CUPS - Most systems should have this installed. To check open a browser and go to http://localhost:631
-  *You only need the **libcups** package, which is the client package
-*hplip - These are the linux hp drivers
+A bash script was made to make the printer installation process *hopefully* painless on any Debian Based Distro, which basically means if you use the apt-get install command to install packages, then this script should hopefully work.
 
-**Some reccomended things**
+**Instructions:**
 
-I'm honostly not positive if these are required but they are worth installing anyway
+* Either clone this repository or click 'Download Zip' on the right-side of github.
+* Navigate to the location where you downloaded it and unzip the DULinuxPrinters. Here's an example on how to do this with command line.
+---
+    [user@someDebDistro ~]: sudo apt-get install zip -y
+    [user@someDebDistro ~]: unzip ~/Downloads/DULinuxPrinters.zip -d ~/Documents && cd ~/Documents/DULinuxPrinters
+    [user@someDebDistro ~]: ./UbuntuInstallScript.sh
+---
+* Now, simply Logout and Log back in. 
 
-  *ghostscript
-  *gsfonts
+**If this script doesn't work please submit an issue, or let Paul or Nathan know. You can also attempt to follow the install instructions below.**
+
+**For Non-Debian Based Users: ** The UbuntuInstallScript.sh can serve as a template. All you would likely have to change is the package manager's name, i.e. change **sudo apt-get install** to **sudo pacman -S** or **sudo yum install** for example.
+
+##Basics
+-----
+
+**You need to have the following installed:**
+
+* **python 2.7** 
+  * To check open a terminal and type: **ls /usr/bin | grep python**
+  * If python3.whatever is installed you will need to use **python2** wherever python is listed
+
+* **PIP**
+
+  * **Note:** PIP is not needed if you can install WxPython through your package manager.
+  * Again to check if installed type: ls /usr/bin | grep pip
+  * Make sure that you have pip2 or pip2.7
+    *  **Note: ** If you have pip installed for python3.xx, make sure to to type **pip2** or whatever wherever the use of pip is specified. 
+
+* **WxPython** - To check if installed go to a terminal, type **python** and type **import wx**
+
+  * If it's not installed, and you have pip properly setup type **pip install WxPython**
+* **CUPS** - Most distros should have this pre-installed. To check open a browser and go to http://localhost:631. If you have any issues the [Arch Wiki article on CUPS](https://wiki.archlinux.org/index.php/CUPS) is probably the best resource.
+  * You only need the **libcups** package, which is the client package
+
+* **hplip** - These are the Linux HP drivers
+* **zip** - Needed for unzipping the .zip file
+
+Here's an exact list of packages you need before installing the hplip package, as per [HP's official linux page](http://hplipopensource.com/hplip-web/install/manual/index.html).
+
+    avahi-utils libcups2 cups libcups2-dev cups-bsd cups-client libcupsimage2-dev libdbus-1-dev build-essential ghostscript openssl libjpeg-dev libsnmp-dev libtool libusb-1.0.0-dev wget python-imaging policykit-1 policykit-1-gnome gtk2-engines-pixbuf python-qt4 python-qt4-dbus python-dbus python-gobject python-dev python-notify2 python python-reportlab libsane libsane-dev sane-utils xsane
 
 ##Installation 
-
+----
 Included is basically everything you need, as long as you have the basics set up properly.
-	1. Unzip DULinuxPrinters.zip to your home directory or Documents directory
-	2. Open a terminal shell and cd into the directory you unzipped into. Type after to check if you're in the right directory
-	3. type **python setup.py**
 
-Alright, assuming everything went well, you should now be able to print. Try test printing a file, obviously things won't be 100% perfect but at least printing works. 
+  1. Unzip DULinuxPrinters.zip to your home directory or Documents directory
 
-##Some things to Note##
-  
-  Currently, double sided printing hasn't been figured out, and you can't print multiple things at once.
+  2. Open a terminal shell and cd into the directory you unzipped into. Type after to check if you're in the right directory
+ 
+  3. type **sudo python setup.py**
 
-  ##Accidental Printing##
-    Because multi-queue printing seems to work poorly, to cancel prints you have to do the following.
-       1. Open a browser and go to http://localhost:631
-       2. Navigate to **Jobs** at the top
-       3. Click cancel job. There will be a pharos popup, ignore it (I dont know what happens if you click OK).
-       4. It will pop open a window asking you to login. Your root account info should work, you may choose to setup permissions to allow your user account. This varies by Distro though.
+---    
+    unzip ~/Downloads/DULinuxPrinters.zip -d ~/Documents && cd ~/Documents/DULinuxPrinters
+    sudo python setup.py
+    
+  Hopefully everything went smoothly on this step. Try printing a test file, you may notice that you don't get a dialog box for print options and only the Pharos Popup appears, a script will be made to give you more print control options in the near future. Make sure you enter your student id then check to see if your document printed, student IDs are still required to print at a DU printing station.
 
-  If you have problems, UTS will probably be worthless. It took a lot of work to get the info required that could easily have just been given out. Please talk to Paul or Nathan for help with any issues. 
+If you encounter any issues you can't figure out how to fix, please submit the issue to the [github page](https://github.com/v3nturetheworld/DULinuxPrinting).
 
-  Currently this process has been tested on Arch Linux and Ubuntu.
-  Also shoutout to the guy who wrote the original reverse engineered Pharos python script. If you need any more help checkout his github here: https://github.com/junaidali/pharos-linux
+##Some things to Note
+----  
+Print options are kind of weird a program specific. For example, when you click Print in XFCE's document viewer it just prints to whatever printer was last used and gives no printing options. Other programs like Adobe Acrobat Reader give a ton of options for printing, and for programs with dialogue boxes like this you should be able to print in whatever way you need. 
 
+* **While not thoroughly tested, the software might not work if your not connected to PioneerNet. If enough people don't have PioneerNet setup on Linux I'll add a section on how to configure it. **
+
+* If you are connected to a VPN that doesn't have an end node connected to the schools internet, then printing won't work.
+
+###Accidental Printing
+
+Because multi-queue printing seems to work poorly, to cancel prints you have to do the following.
+
+  1. Open a browser and go to http://localhost:631
+
+  2. Navigate to **Jobs** at the top
+     * **Note: ** If Jobs is empty, then the print job was already sent to the printer. If you didn't want to print a document or accidentally printed a bunch of documents they will time out eventually. **Check the cost of the print job before you print it!!!!**
+
+  3. Click cancel job. There might be a Pharos popup (the same one you see when you print), ignore it (I don't know what happens if you click OK).
+  4. It will pop open a window asking you to login. Your root account info should work, you may choose to setup permissions to allow your user account. This varies by Distro though.
+
+  If you have problems, please talk to Paul or Nathan or submit an issue to the GitHub page. If you know python and want to help, feel free to try and get some more features working with the printers. 
+
+  Also a TON of credit goes to the guy who wrote the original reverse engineered Pharos python script. If you need any more help checkout his [GitHub](https://github.com/junaidali/pharos-linux).

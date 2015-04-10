@@ -36,7 +36,7 @@ class wxPopupFrame(wx.Frame):
 		titleFont = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)		
 		self.titleText = wx.StaticText(self, -1, "Print Job Details")
 		self.titleText.SetFont(titleFont)
-		self.userInputText = wx.StaticText(self, -1, "Please enter your myIIT ID*")
+		self.userInputText = wx.StaticText(self, -1, "Please enter your DU ID*")
 		self.sizingPanelAfterUserInputText = wx.Panel(self, -1)
 		self.userInputTextCtrl = wx.TextCtrl(self, -1, "",  style=wx.TE_PROCESS_ENTER)
 		self.userInformationText = wx.StaticText(self, -1, "* This ID will be used at the release station to release your print job")
