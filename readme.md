@@ -12,11 +12,14 @@ A bash script was made to make the printer installation process *hopefully* pain
 **Instructions:**
 
 * Either clone this repository or click 'Download Zip' on the right-side of github.
-* Navigate to the location where you downloaded it and unzip the DULinuxPrinters. Here's an example on how to do this with command line.
+* Navigate to the location where you downloaded it and unzip the DULinuxPrinters.
+* Be sure to compile the binary using chmod.
+* Here's an example on how to do this with command line.
 ---
     [user@someDebDistro ~]: sudo apt-get install zip -y
     [user@someDebDistro ~]: unzip ~/Downloads/DULinuxPrinters.zip -d ~/Documents && cd ~/Documents/DULinuxPrinters
-    [user@someDebDistro ~]: ./UbuntuInstallScript.sh
+    [user@someDebDistro ~]: chmod u+x ./UbuntuInstallScript.sh
+    [user@someDebDistro ~]: sudo ./UbuntuInstallScript.sh
 ---
 * Now, simply Logout and Log back in. 
 
