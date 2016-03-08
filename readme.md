@@ -2,6 +2,8 @@
 #DU Linux Printer Installation Guide
 ----
 
+If you are having issues please email Paul.Heinen@du.edu and Dan.Cruwys@du.edu.
+
 ##Debian/Ubuntu Distro Quick Install
 ----
 
