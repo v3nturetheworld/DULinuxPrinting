@@ -24,7 +24,7 @@ sudo systemctl restart org.cups.cupsd.service
     4. Select HP and click continue
     5. Select **HP LaserJet Series PCL 6 CUPS**
     6. Select **Add Printer** at the bottom of the page.
-8. Repeat the above with the address`lpd://YOUR_ID_NUMBER@uniprint.cair.du.edu/p-dunetm6xx`. Make sure to select **HP DesignJet 600, pcl**.
+8. Repeat the above with the address`lpd://YOUR_ID_NUMBER@uniprint.cair.du.edu/p-dunet6xx`. Make sure to select **HP DesignJet 600, pcl**.
 
 
 
