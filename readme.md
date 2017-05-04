@@ -6,8 +6,8 @@
 2. Download and install **ghostscript**, again using your package manager
 3. Enable the CUPS service (command for systemd users): 
 ```bash
-sudo systemctrl enable org.cups.cupsd.service`
-sudo systemctrl start org.cups.cupsd.service`
+sudo systemctl enable org.cups.cupsd.service`
+sudo systemctl start org.cups.cupsd.service`
 ```
 4. Update your permissions (this step assumes your username is part of the usergroup 'wheel'):
 ```bash
