@@ -11,7 +11,7 @@ sudo systemctl start org.cups.cupsd.service`
 ```
 4. Update your permissions (this step assumes your username is part of the usergroup 'wheel'):
 ```bash
-sudo sed -i '/SystemGroup sys root s/$ wheel/' /etc/cups/cups-files.conf`
+sudo sed -i '/SystemGroup sys root$/ s/$/ wheel/' /etc/cups/cups-files.conf
 sudo systemctl restart cups
 ```
 5. Open a browser to http://localhost:631/
