@@ -1,6 +1,31 @@
 
 # DU Linux Printer Installation Guide
 ----
+# Quick and Easy Mode
+1. Download and install **CUPS** using your package manager
+2. Download and install **ghostscript**, again using your package manager
+3. Enable the CUPS service (command for systemd users): 
+```bash
+sudo systemctrl enable org.cups.cupsd.service`
+sudo systemctrl start org.cups.cupsd.service`
+```
+4. Update your permissions (this step assumes your username is part of the usergroup 'wheel'):
+```bash
+sudo sed -i '/SystemGroup sys root s/$ wheel/' /etc/cups/cups-files.conf`
+sudo systemctl restart cups
+```
+5. Open a browser to http://localhost:631/
+6. Under CUPS for Administrators, Click **Adding Printers and Classes**
+7. Click add Printer
+    a. Select LPD
+    b. Enter the address: `lpd://YOUR_ID_NUMBER@uniprint.cair.du.edu/p-dunet4525`
+    c. Enter whatever you want for this step, it doesn't matter
+    d. Select HP and click continue
+    e. Select **HP LaserJet Series PCL 6 CUPS**
+    f. Select **Add Printer** at the bottom of the page.
+8. Repeat the above with the address`lpd://YOUR_ID_NUMBER@uniprint.cair.du.edu/p-dunetm6xx`. Make sure to select **HP DesignJet 600, pcl**.
+
+
 
 If you are having issues please email Paul.Heinen@du.edu and Dan.Cruwys@du.edu.
 
