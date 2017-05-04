@@ -1,10 +1,10 @@
 
-#DU Linux Printer Installation Guide
+# DU Linux Printer Installation Guide
 ----
 
 If you are having issues please email Paul.Heinen@du.edu and Dan.Cruwys@du.edu.
 
-##Debian/Ubuntu Distro Quick Install
+## Debian/Ubuntu Distro Quick Install
 ----
 
 **Make Sure to Read *Some Things To Note* Below after you set the printers up. There are instructions on how to properly use the software there and avoid running into issues with printing.**
@@ -29,7 +29,7 @@ A bash script was made to make the printer installation process *hopefully* pain
 
 **For Non-Debian Based Users: ** The UbuntuInstallScript.sh can serve as a template. All you would likely have to change is the package manager's name, i.e. change **sudo apt-get install** to **sudo pacman -S** or **sudo yum install** for example.
 
-##Basics
+## Basics
 -----
 
 **You need to have the following installed:**
@@ -58,7 +58,7 @@ Here's an exact list of packages you need before installing the hplip package, a
 
     avahi-utils libcups2 cups libcups2-dev cups-bsd cups-client libcupsimage2-dev libdbus-1-dev build-essential ghostscript openssl libjpeg-dev libsnmp-dev libtool libusb-1.0.0-dev wget python-imaging policykit-1 policykit-1-gnome gtk2-engines-pixbuf python-qt4 python-qt4-dbus python-dbus python-gobject python-dev python-notify2 python python-reportlab libsane libsane-dev sane-utils xsane
 
-##Installation 
+## Installation 
 ----
 Included is basically everything you need, as long as you have the basics set up properly.
 
@@ -76,7 +76,7 @@ Included is basically everything you need, as long as you have the basics set up
 
 If you encounter any issues you can't figure out how to fix, please submit the issue to the [github page](https://github.com/v3nturetheworld/DULinuxPrinting).
 
-##Some things to Note
+## Some things to Note
 ----  
 Print options are kind of weird a program specific. For example, when you click Print in XFCE's document viewer it just prints to whatever printer was last used and gives no printing options. Other programs like Adobe Acrobat Reader give a ton of options for printing, and for programs with dialogue boxes like this you should be able to print in whatever way you need. 
 
@@ -84,7 +84,7 @@ Print options are kind of weird a program specific. For example, when you click 
 
 * If you are connected to a VPN that doesn't have an end node connected to the schools internet, then printing won't work.
 
-###Accidental Printing
+### Accidental Printing
 
 Because multi-queue printing seems to work poorly, to cancel prints you have to do the following.
 
