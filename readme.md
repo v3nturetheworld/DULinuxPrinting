@@ -2,6 +2,7 @@
 # DU Linux Printer Installation Guide
 ----
 # Quick and Easy Mode
+_note: These instructions were tested on Arch Linux_
 1. Download and install **CUPS** using your package manager
 2. Download and install **ghostscript**, again using your package manager
 3. Enable the CUPS service (command for systemd users): 
@@ -12,7 +13,7 @@ sudo systemctl start org.cups.cupsd.service`
 4. Update your permissions (this step assumes your username is part of the usergroup 'wheel'):
 ```bash
 sudo sed -i '/SystemGroup sys root$/ s/$/ wheel/' /etc/cups/cups-files.conf
-sudo systemctl restart cups
+sudo systemctl restart org.cups.cupsd.service
 ```
 5. Open a browser to http://localhost:631/
 6. Under CUPS for Administrators, Click **Adding Printers and Classes**
